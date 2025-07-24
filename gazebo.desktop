@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Gazebo
+Comment=3D robot simulator
+Exec=bash -c 'source /opt/ros/humble/setup.bash && gazebo'
+Icon=gazebo
+Terminal=false
+Categories=Development;Simulation;
