@@ -82,7 +82,20 @@ RUN apt-get update && \
       gazebo \
       ros-${ROS_DISTRO}-gazebo-ros \
       ros-${ROS_DISTRO}-gazebo-ros-pkgs \
-      ros-${ROS_DISTRO}-gazebo-plugins
+      ros-${ROS_DISTRO}-gazebo-plugins \
+      ros-${ROS_DISTRO}-xacro \
+      ros-${ROS_DISTRO}-gazebo-ros-pkgs \
+      ros-${ROS_DISTRO}-robot-state-publisher \
+      ros-${ROS_DISTRO}-controller-manager \
+      ros-${ROS_DISTRO}-ros2-controllers \
+      ros-${ROS_DISTRO}-gazebo-ros2-control \
+      ros-${ROS_DISTRO}-joint-state-broadcaster \
+      ros-${ROS_DISTRO}-diff-drive-controller \
+      ros-${ROS_DISTRO}-robot-localization \
+      ros-${ROS_DISTRO}-navigation2 \
+      ros-${ROS_DISTRO}-slam-toolbox \
+      ros-${ROS_DISTRO}-teleop-twist-keyboard \
+      && rm -rf /var/lib/apt/lists/*
 
 # Install comprehensive theming and font packages for professional GUI appearance
 # Font packages:
@@ -180,6 +193,18 @@ RUN mkdir -p /home/gazebo/.vnc \
     && mkdir -p /home/gazebo/.config/fontconfig \
     && cp /root/.config/fontconfig/fonts.conf /home/gazebo/.config/fontconfig/ \
     && chown -R gazebo:gazebo /home/gazebo
+
+# Configure automatic KDE login
+RUN mkdir -p /etc/sddm.conf.d && \
+    echo "[Autologin]" > /etc/sddm.conf.d/autologin.conf && \
+    echo "User=gazebo" >> /etc/sddm.conf.d/autologin.conf && \
+    echo "Session=plasma" >> /etc/sddm.conf.d/autologin.conf
+
+# Remove sudo access for gazebo user and disable root access
+RUN usermod -d /home/gazebo -s /bin/bash gazebo && \
+    deluser gazebo sudo 2>/dev/null || true && \
+    passwd -l root && \
+    sed -i 's/^gazebo:.*$/gazebo:x:1000:1000:gazebo:\/home\/gazebo:\/bin\/bash/' /etc/passwd
 
 # Switch to gazebo user for all subsequent operations
 # This ensures the container runs as non-root by default
