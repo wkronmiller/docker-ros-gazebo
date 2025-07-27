@@ -1,0 +1,31 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# Prevent interactive prompts during package installation
+# Essential for automated Docker builds
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install Gazebo Classic simulation environment and ROS2 integration packages
+# - gazebo: Gazebo Classic robot simulation software
+# - ros-*-gazebo-ros: Core ROS2-Gazebo bridge and communication layer
+# - ros-*-gazebo-ros-pkgs: Additional ROS2-Gazebo integration packages
+# - ros-*-gazebo-plugins: Sensor and actuator plugins for Gazebo simulations
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      gazebo \
+      ros-${ROS_DISTRO}-gazebo-ros \
+      ros-${ROS_DISTRO}-gazebo-ros-pkgs \
+      ros-${ROS_DISTRO}-gazebo-plugins \
+      ros-${ROS_DISTRO}-xacro \
+      ros-${ROS_DISTRO}-gazebo-ros-pkgs \
+      ros-${ROS_DISTRO}-robot-state-publisher \
+      ros-${ROS_DISTRO}-controller-manager \
+      ros-${ROS_DISTRO}-ros2-controllers \
+      ros-${ROS_DISTRO}-gazebo-ros2-control \
+      ros-${ROS_DISTRO}-joint-state-broadcaster \
+      ros-${ROS_DISTRO}-diff-drive-controller \
+      ros-${ROS_DISTRO}-robot-localization \
+      ros-${ROS_DISTRO}-navigation2 \
+      ros-${ROS_DISTRO}-slam-toolbox \
+      ros-${ROS_DISTRO}-teleop-twist-keyboard \
+      && rm -rf /var/lib/apt/lists/*
