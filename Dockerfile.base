@@ -53,11 +53,13 @@ RUN apt-get update && \
 
 # Install ROS2 desktop meta-package and build tools
 # - ros-humble-desktop: Complete ROS2 installation with GUI tools (RViz, rqt, etc.)
+# - ros-humble-mavros, ros-humble-mavros-msgs: MAVLink integration packages for autopilot communication
 # - python3-rosdep2: Dependency management tool for ROS packages
 # - python3-colcon-common-extensions: Build system for ROS2 workspaces
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       ros-${ROS_DISTRO}-desktop \
+      ros-${ROS_DISTRO}-mavros ros-${ROS_DISTRO}-mavros-msgs \
       python3-rosdep2 python3-colcon-common-extensions \
     && rm -rf /var/lib/apt/lists/*
 

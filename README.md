@@ -178,6 +178,7 @@ FROM base AS ros
 - ROS2 Humble desktop meta-package (includes RViz, rqt tools)
 - Gazebo Classic robot simulator
 - ROS2-Gazebo bridge packages (`gazebo-ros`, `gazebo-ros-pkgs`)
+- MAVROS packages (`ros-humble-mavros`, `ros-humble-mavros-msgs`) for MAVLink autopilot communication
 - Python development tools (`rosdep2`, `colcon`)
 - Comprehensive theming packages for professional GUI
 - Font packages for text rendering
