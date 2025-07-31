@@ -40,6 +40,7 @@ docker compose up -d
 - **Desktop**: Click the Gazebo icon on the desktop to launch the simulator
 
 ### 4. Login Credentials (if needed)
+- The container automatically logs into the `gazebo` user, and the KDE screen locker is disabled to keep sessions active.
 - **Username**: `gazebo`
 - **Password**: `password12345!`
 

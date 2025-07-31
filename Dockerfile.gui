@@ -85,6 +85,7 @@ RUN useradd -m -s /bin/bash gazebo \
 # - Create VNC directory and password file for gazebo user
 # - Set up desktop directory with Gazebo shortcut
 # - Copy configuration files to gazebo user's home
+# - Disable KDE screen auto-lock to keep sessions active
 # - Set proper ownership and permissions for all gazebo user files
 RUN mkdir -p /home/gazebo/.vnc \
     && printf "1234\n1234\n\n" | vncpasswd -f > /home/gazebo/.vnc/passwd \
@@ -94,6 +95,8 @@ RUN mkdir -p /home/gazebo/.vnc \
     && cp /root/.gtkrc-2.0 /home/gazebo/ \
     && mkdir -p /home/gazebo/.config/fontconfig \
     && cp /root/.config/fontconfig/fonts.conf /home/gazebo/.config/fontconfig/ \
+    && mkdir -p /home/gazebo/.config \
+    && printf "[Daemon]\nAutolock=false\nLockOnSuspend=false\n" > /home/gazebo/.config/kscreenlockerrc \
     && chown -R gazebo:gazebo /home/gazebo
 
 # Configure automatic KDE login
