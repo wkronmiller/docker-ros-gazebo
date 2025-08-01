@@ -9,13 +9,13 @@ GUI_NAME := ghcr.io/wkronmiller/docker-ros-gazebo-gui
 all: gui
 
 base:
-	docker build -t $(BASE_NAME):$(GIT_TAG) -f Dockerfile.base .
+	docker build -t $(BASE_NAME):$(GIT_TAG) -f base/Dockerfile .
 
 gazebo: base
-	docker build --build-arg BASE_IMAGE=$(BASE_NAME):$(GIT_TAG) -t $(GAZEBO_NAME):$(GIT_TAG) -f Dockerfile.gazebo .
+	docker build --build-arg BASE_IMAGE=$(BASE_NAME):$(GIT_TAG) -t $(GAZEBO_NAME):$(GIT_TAG) -f gazebo/Dockerfile .
 
 gui: gazebo
-	docker build --build-arg BASE_IMAGE=$(GAZEBO_NAME):$(GIT_TAG) -t $(GUI_NAME):$(GIT_TAG) -f Dockerfile.gui .
+	docker build --build-arg BASE_IMAGE=$(GAZEBO_NAME):$(GIT_TAG) -t $(GUI_NAME):$(GIT_TAG) -f gui/Dockerfile .
 
 publish: base gazebo gui
 	docker push $(BASE_NAME):$(GIT_TAG)
