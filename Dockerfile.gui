@@ -4,17 +4,23 @@ ARG BASE_IMAGE
 # -----------------------------------------------------------------------------
 FROM ${BASE_IMAGE} AS final
 
-# Install comprehensive theming and font packages for professional GUI appearance
-# Font packages:
-# - fontconfig: Font configuration and management system
-# - fonts-dejavu, fonts-liberation: High-quality open source fonts
-# GTK/Qt theming packages:
-# - gtk2-engines-*: GTK2 theme engines for consistent widget appearance
-# - gnome-themes-extra, adwaita-icon-theme: Modern theme components
-# - ubuntu-mono, yaru-theme-*: Ubuntu's default theme and icon set
-# - qt5-style-*: Qt5 style plugins for theme consistency across toolkits
-# - gsettings-desktop-schemas: Configuration schemas for desktop settings
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install desktop environment, VNC server, and theming packages
+# Desktop components:
+# - kde-plasma-desktop, konsole, plasma-workspace, kwin-x11
+# - xvfb, tigervnc-standalone-server, tigervnc-common, tightvncserver
+# - dbus-x11, sudo
+# Theming and fonts:
+# - fontconfig, fonts-dejavu, fonts-liberation
+# - gtk2-engines-*, gnome-themes-extra, adwaita-icon-theme
+# - ubuntu-mono, yaru-theme-*, qt5-style-*, gsettings-desktop-schemas
 RUN apt-get update && apt-get install -y --no-install-recommends \
+      kde-plasma-desktop konsole plasma-workspace kwin-x11 \
+      xvfb \
+      tigervnc-standalone-server tigervnc-common tightvncserver \
+      dbus-x11 sudo \
       fontconfig fonts-dejavu fonts-liberation \
       gtk2-engines-murrine gtk2-engines-pixbuf \
       gnome-themes-extra adwaita-icon-theme \
