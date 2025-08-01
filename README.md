@@ -9,8 +9,8 @@ Get up and running in under 5 minutes:
 ### 1. Build the Container
 ```bash
 git clone <your-repo-url>
-cd gazebo
-docker build -t ros2-gazebo-vnc .
+cd docker-ros-gazebo
+docker build -t ros2-gazebo-vnc -f gui/Dockerfile .
 ```
 
 ### 2. Run the Container
@@ -92,7 +92,7 @@ The container provides a complete Linux desktop environment accessible via VNC, 
 
 ### Core Container Files
 
-#### `Dockerfile`
+#### `gui/Dockerfile`
 Multi-stage Docker build file with three stages:
 - **Stage 0 (base)**: CUDA-enabled Ubuntu with KDE Plasma desktop and VNC server
 - **Stage 1 (ros)**: ROS2 Humble installation with Gazebo and theming packages
@@ -104,7 +104,7 @@ Key features:
 - Font configuration for crisp text rendering
 - Desktop shortcuts and launchers
 
-#### `start.sh`
+#### `gui/entrypoint.sh`
 Container startup script that:
 - Sources ROS2 environment (`/opt/ros/humble/setup.bash`)
 - Configures XDG runtime directories for desktop session
@@ -121,21 +121,21 @@ Environment variables configured:
 
 ### Desktop Configuration Files
 
-#### `gazebo.desktop`
+#### `gui/gazebo.desktop`
 Desktop launcher shortcut for Gazebo simulator:
 - **Type**: Application launcher
 - **Exec**: `bash -c 'source /opt/ros/humble/setup.bash && gazebo'`
 - **Category**: Development/Simulation
 - Creates clickable desktop icon for easy Gazebo access
 
-#### `fonts.conf`
+#### `gui/fonts.conf`
 Font rendering configuration for crisp text display:
 - Enables font anti-aliasing for smooth text
 - Configures hinting for better readability
 - Sets LCD filter for optimal screen rendering
 - Uses RGB sub-pixel rendering
 
-#### `gtkrc-2.0`
+#### `gui/gtkrc-2.0`
 GTK2 theme configuration ensuring visual consistency:
 - **Theme**: Yaru (Ubuntu's modern theme)
 - **Icons**: Yaru icon set

@@ -56,26 +56,26 @@ ENV DISPLAY=:1
 # - Copies Gazebo application launcher to desktop
 # - Makes launcher executable so it appears properly in desktop environment
 RUN mkdir -p /root/Desktop
-COPY gazebo.desktop /root/Desktop/gazebo.desktop
+COPY gui/gazebo.desktop /root/Desktop/gazebo.desktop
 RUN chmod +x /root/Desktop/gazebo.desktop
 
 # Install GTK2 theme configuration for consistent widget appearance
 # - Copies custom GTK2 configuration to user's home directory
 # - Ensures GTK2 applications match the KDE Plasma theme
-COPY gtkrc-2.0 /root/.gtkrc-2.0
+COPY gui/gtkrc-2.0 /root/.gtkrc-2.0
 
 # Configure font rendering with anti-aliasing for crisp text display
 # - Creates fontconfig directory structure
 # - Copies custom font configuration for improved text rendering
 # - Essential for professional appearance in GUI applications
 RUN mkdir -p /root/.config/fontconfig
-COPY fonts.conf /root/.config/fontconfig/fonts.conf
+COPY gui/fonts.conf /root/.config/fontconfig/fonts.conf
 
 # Install custom startup script that configures VNC and launches desktop
 # - Copies startup script to system binary directory
 # - Makes script executable so it can run as container entrypoint
 # - Script handles VNC server startup and desktop environment initialization
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY gui/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Create non-root user account for secure operation
