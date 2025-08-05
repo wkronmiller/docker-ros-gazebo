@@ -1,0 +1,54 @@
+# =============================================================================
+# MAVROS Configuration for Flight Computer
+# =============================================================================
+# Configuration for MAVROS communication with ArduPilot flight controller
+# Optimized for rover operations and multi-container architecture
+# =============================================================================
+
+# Connection settings
+conn:
+  heartbeat_rate: 1.0    # Heartbeat rate in Hz
+  timeout: 10.0          # Connection timeout in seconds
+  timesync_rate: 10.0    # Time synchronization rate
+  system_time_rate: 1.0  # System time broadcast rate
+
+# System settings
+sys:
+  min_voltage: 10.0      # Minimum system voltage
+  disable_diag: false    # Enable diagnostics
+
+# Time synchronization
+time:
+  time_ref_source: "fcu"  # Use flight controller as time reference
+  timesync_mode: MAVLINK  # Use MAVLink time sync
+  timesync_avg_alpha: 0.6 # Time sync averaging factor
+
+# Frame transforms
+frame_id: "base_link"
+tf:
+  send: false           # Don't send TF transforms (handled by robot_localization)
+  frame_id: "base_link"
+  child_frame_id: "base_link"
+
+# Plugin settings
+plugin_blacklist: []    # No plugins blacklisted
+plugin_whitelist: [
+  'sys_status',
+  'sys_time',
+  'heartbeat',
+  'command',
+  'param',
+  'mission_protocol_base',
+  'waypoint',
+  'rc_io',
+  'manual_control',
+  'global_position',
+  'imu',
+  'local_position',
+  'setpoint_position',
+  'setpoint_velocity',
+  'setpoint_attitude',
+]
+
+# Startup FCU message
+startup_px4_usb_quirk: false
