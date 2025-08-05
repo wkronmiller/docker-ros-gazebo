@@ -1,0 +1,83 @@
+# =============================================================================
+# ArduPilot Rover Parameter Configuration
+# =============================================================================
+# Configuration for Traxxas Rustler 4x4 VXL rover simulation
+# Optimized for agricultural and autonomous navigation applications
+# =============================================================================
+
+# Frame Configuration
+FRAME_CLASS,1                    # Ground Vehicle
+FRAME_TYPE,1                     # Rover
+
+# GPS Configuration
+GPS_TYPE,1                       # Auto GPS detection
+GPS_TYPE2,0                      # No secondary GPS
+GPS_AUTO_SWITCH,1                # Auto switch between GPS receivers
+
+# Extended Kalman Filter (EKF) Configuration
+EK3_ENABLE,1                     # Enable EKF3
+EK3_IMU_MASK,1                   # Use first IMU
+EK3_GPS_TYPE,0                   # 3D GPS
+EK3_ALT_SOURCE,0                 # Use GPS for altitude
+EK3_SRC1_POSXY,3                 # GPS position source
+EK3_SRC1_VELXY,3                 # GPS velocity source
+EK3_SRC1_POSZ,1                  # Barometer altitude source
+
+# Rover Navigation Parameters
+CRUISE_SPEED,2.0                 # Cruise speed in m/s
+SPEED_TURN_GAIN,100              # Speed reduction in turns
+TURN_MAX_G,0.6                   # Maximum lateral G-force in turns
+WP_RADIUS,2.0                    # Waypoint radius in meters
+WP_OVERSHOOT,2.0                 # Waypoint overshoot distance
+
+# Throttle Configuration
+THR_MIN,0                        # Minimum throttle percentage
+THR_MAX,100                      # Maximum throttle percentage
+CRUISE_THROTTLE,50               # Normal cruise throttle
+
+# Steering Configuration
+STEER2SRV_TCONST,0.75           # Steering time constant
+STEER2SRV_P,1.8                 # Steering P gain
+STEER2SRV_I,0.2                 # Steering I gain
+STEER2SRV_D,0.0                 # Steering D gain
+STEER2SRV_IMAX,1500             # Steering I max
+
+# Safety and Failsafe Configuration
+FS_CRASH_CHECK,1                 # Enable crash check
+FS_THR_ENABLE,1                  # Enable throttle failsafe
+FS_THR_VALUE,925                 # Throttle failsafe value
+FS_GCS_ENABLE,1                  # Enable GCS failsafe
+FS_TIMEOUT,5                     # Failsafe timeout in seconds
+
+# Battery Monitoring (for SITL simulation)
+BATT_MONITOR,0                   # Disable battery monitoring in SITL
+BATT_CAPACITY,5000               # Battery capacity in mAh
+
+# Logging Configuration
+LOG_BACKEND_TYPE,1               # File logging
+LOG_FILE_BUFSIZE,16              # Log buffer size
+LOG_DISARMED,0                   # Don't log when disarmed
+
+# Serial Port Configuration for MAVLink
+SERIAL0_PROTOCOL,2               # MAVLink2 on USB port
+SERIAL0_BAUD,115                 # 115200 baud rate
+SERIAL1_PROTOCOL,2               # MAVLink2 on telemetry port
+SERIAL1_BAUD,57                  # 57600 baud rate
+
+# RC Input Configuration (for manual override)
+RC1_MIN,1000                     # RC channel 1 minimum
+RC1_MAX,2000                     # RC channel 1 maximum
+RC1_TRIM,1500                    # RC channel 1 center
+RC3_MIN,1000                     # RC channel 3 (throttle) minimum
+RC3_MAX,2000                     # RC channel 3 maximum
+RC3_TRIM,1000                    # RC channel 3 trim (idle)
+
+# Autonomous Mode Settings
+AUTO_TRIGGER_PIN,0               # No auto trigger pin
+AUTO_KICKSTART,1.0               # Auto kickstart speed
+MODE1,0                          # Manual mode
+MODE2,4                          # Guided mode
+MODE3,10                         # Auto mode
+MODE4,6                          # RTL mode
+MODE5,2                          # Learning mode
+MODE6,5                          # Hold mode

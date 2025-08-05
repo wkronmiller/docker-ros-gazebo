@@ -1,248 +1,384 @@
-# ROS2 Gazebo VNC Container
+# Multi-Component AI Rover Docker Images
 
-A containerized environment for robotics development featuring ROS2 Humble, Gazebo Classic simulation, and remote GUI access via VNC. This setup provides a complete desktop environment optimized for robotics development and simulation work.
+This repository builds Docker images for a multi-component AI rover system with ArduPilot SITL simulator support.
+
+## Architecture
+
+The repository produces six Docker images organized in two systems:
+
+### Layered Base Images
+- **`docker-ros-base`** - Base ROS2 Humble environment
+- **`docker-ros-gazebo`** - Gazebo simulation and navigation stack
+- **`docker-ros-gazebo-gui`** - GUI desktop environment with VNC
+
+### Multi-Component Images  
+- **`rover-flight-controller`** - Pure ArduPilot SITL rover autopilot
+- **`rover-flight-computer`** - ROS2 navigation stack with MAVROS bridge
+- **`rover-simulation`** - Gazebo physics simulation with sensor modeling
 
 ## Quick Start
 
-Get up and running in under 5 minutes:
-
-### 1. Build the Container
+### Build All Images
 ```bash
-git clone <your-repo-url>
-cd docker-ros-gazebo
-docker build -t ros2-gazebo-vnc -f gui/Dockerfile .
+# Build everything (base images + multi-component)
+make all
+
+# Build only base layered images
+make base gazebo gui
+
+# Build only multi-component images  
+make multicomponent
 ```
 
-### 2. Run the Container
+### Build Individual Images
 ```bash
-# Basic usage
-docker run -d \
-  --name gazebo-desktop \
+# Base system
+make base          # ROS2 Humble foundation
+make gazebo        # Gazebo + Navigation2
+make gui           # Desktop GUI with VNC
+
+# Multi-component system
+make flight-controller  # ArduPilot SITL
+make flight-computer   # ROS2 + MAVROS
+make simulation        # Gazebo physics
+```
+
+### Publish Images
+```bash
+# Publish all images with current git tag
+make publish
+
+# Publish and tag as latest
+make publish-latest
+
+# Publish specific sets
+make publish-base           # Base images only
+make publish-multicomponent # Multi-component only
+```
+
+## Image Details
+
+### Base Images
+
+#### **docker-ros-base** (`ghcr.io/wkronmiller/docker-ros-base`)
+**Size:** ~3.6GB | **Base:** NVIDIA CUDA 12.3.2 Ubuntu 22.04
+
+**Contains:**
+- Ubuntu 22.04 LTS with NVIDIA CUDA 12.3.2 support for GPU acceleration
+- ROS2 Humble desktop meta-package (RViz, rqt, navigation tools)
+- Python 3.10 with rosdep2 and colcon build system
+- Essential development tools and dependencies
+
+**Use Cases:**
+- Foundation for any ROS2 Humble application
+- Base layer for custom robotics containers
+- Development environment for ROS2 projects
+- CUDA-enabled applications requiring ROS2
+
+#### **docker-ros-gazebo** (`ghcr.io/wkronmiller/docker-ros-gazebo`)
+**Size:** ~4.2GB | **Base:** docker-ros-base
+
+**Contains:**
+- Gazebo Classic simulation environment with full physics engine
+- ROS2-Gazebo integration packages (gazebo-ros, gazebo-ros-pkgs, gazebo-plugins)
+- Navigation2 complete stack for autonomous navigation
+- SLAM Toolbox for simultaneous localization and mapping
+- Robot localization package for sensor fusion
+- ROS2 Control framework and controllers (diff_drive_controller, joint_state_broadcaster)
+- Teleop keyboard control for manual robot operation
+
+**Use Cases:**
+- Robot simulation and testing environment
+- Navigation algorithm development and testing
+- Multi-robot system simulation
+- Foundation for custom Gazebo simulations
+- Autonomous navigation research and development
+
+#### **docker-ros-gazebo-gui** (`ghcr.io/wkronmiller/docker-ros-gazebo-gui`)
+**Size:** ~4.8GB | **Base:** docker-ros-gazebo
+
+**Contains:**
+- KDE Plasma desktop environment optimized for robotics workflows
+- TigerVNC server (port 5901) with password authentication
+- X11 forwarding and display management (DISPLAY=:1)
+- Custom font rendering and GTK theming for professional appearance
+- Pre-configured Gazebo desktop launcher
+- Non-root 'gazebo' user with sudo privileges for secure operation
+- Automatic desktop login and screen lock disabled for continuous operation
+
+**Use Cases:**
+- Remote robotics development and visualization
+- Gazebo GUI access through VNC clients
+- RViz and rqt tool visualization
+- Educational robotics environments
+- Collaborative robot development sessions
+
+### Multi-Component Images
+
+#### **rover-flight-controller** (`ghcr.io/wkronmiller/rover-flight-controller`)
+**Size:** ~3.7GB | **Base:** Ubuntu 22.04
+
+**Contains:**
+- ArduPilot SITL (Software In The Loop) complete rover autopilot system
+- Python 3.10 with essential scientific packages (opencv, matplotlib, pygame)
+- PyMAVLink, MAVProxy, and ArduPilot communication tools
+- Custom rover parameters and mission files in `/home/ardupilot/custom/`
+- ArduPilot source code with all submodules for customization
+- MAVLink communication ports (14550/UDP primary, 5760 console)
+- Dedicated 'ardupilot' user for secure operation
+
+**Use Cases:**
+- Hardware-authentic flight controller simulation
+- ArduPilot algorithm development and testing
+- MAVLink protocol testing and validation
+- Rover autopilot behavior analysis
+- Mission planning and execution testing
+- Integration testing with external flight computers
+
+**Environment Variables:**
+- `VEHICLE=APMrover2` - ArduPilot vehicle type
+- `MODEL=rover` - Simulation model configuration
+- `LAT/LON` - GPS home position coordinates
+- `SPEEDUP=1` - Simulation time multiplier
+
+#### **rover-flight-computer** (`ghcr.io/wkronmiller/rover-flight-computer`)
+**Size:** ~4.3GB | **Base:** docker-ros-gazebo
+
+**Contains:**
+- Complete ROS2 Humble environment with all Gazebo and Navigation2 packages
+- MAVROS bridge for ArduPilot communication with full message support
+- MAVROS extras for advanced autopilot integration features
+- GeographicLib datasets for GPS coordinate transformations
+- Custom ROS2 workspace with flight computer packages
+- Pre-built packages for immediate deployment
+- Dedicated 'gazebo' user matching other components
+
+**Use Cases:**
+- High-level rover navigation and mission planning
+- ArduPilot-ROS2 bridge operations
+- Autonomous navigation with obstacle avoidance
+- Sensor data processing and fusion
+- Mission execution and monitoring
+- Integration with external planning systems
+
+**Key Features:**
+- MAVROS FCU URL configured for flight-controller communication
+- ROS2 domain ID 0 for multi-robot coordination
+- Symlinked installation for rapid development iteration
+
+#### **rover-simulation** (`ghcr.io/wkronmiller/rover-simulation`)
+**Size:** ~4.2GB | **Base:** docker-ros-gazebo
+
+**Contains:**
+- Complete Gazebo Classic physics simulation environment
+- ROS2 Control framework with rover-specific controllers
+- Robot state publisher and joint state management
+- Additional control packages for comprehensive robot simulation
+- Custom simulation workspace with worlds and configurations
+- Pre-built ROS2 packages for immediate use
+- Dedicated 'gazebo' user for consistency
+
+**Use Cases:**
+- Physics-accurate rover simulation
+- Sensor modeling and testing (GPS, IMU, cameras, LiDAR)
+- Environmental interaction simulation
+- Multi-robot scenario testing
+- Hardware-in-the-loop simulation preparation
+- Algorithm validation in realistic physics
+
+**Key Features:**
+- ROS2 domain ID 0 for seamless multi-component communication
+- Configurable world models and sensor configurations
+- Empty Gazebo model database for custom model integration
+- GPS coordinates matching flight controller for consistency
+
+**Note:** ArduPilot Gazebo plugin integration is prepared but commented out due to compatibility with Gazebo Classic. Future versions may migrate to Gazebo Garden for full plugin support.
+
+## System Architecture & Communication
+
+### Multi-Component Communication Flow
+```
+┌─────────────────────┐    MAVLink/UDP     ┌─────────────────────┐
+│  flight-controller  │◄──────────────────►│  flight-computer    │
+│  (ArduPilot SITL)   │     Port 14550     │  (ROS2 + MAVROS)    │
+└─────────────────────┘                    └─────────────────────┘
+                                                     │
+                                                     │ ROS2 Topics
+                                                     │ Domain ID 0
+                                                     ▼
+┌─────────────────────┐    Gazebo Physics   ┌─────────────────────┐
+│   GUI (Optional)    │◄──────────────────►│     simulation      │
+│  (VNC Visualization)│     Port 11345     │  (Gazebo Physics)   │
+└─────────────────────┘                    └─────────────────────┘
+```
+
+### Port Mappings
+- **14550/UDP**: MAVLink communication (flight-controller ↔ flight-computer)
+- **5760/TCP**: ArduPilot console/GCS connection
+- **5901/TCP**: VNC server for GUI access
+- **11345/TCP**: Gazebo master URI for physics simulation
+
+### Network Configuration
+All components use **ROS2 Domain ID 0** for seamless topic communication between flight-computer and simulation containers.
+
+## File Structure
+
+```
+docker-ros-gazebo/
+├── base/
+│   └── Dockerfile              # ROS2 base image
+├── gazebo/  
+│   └── Dockerfile              # Gazebo + navigation
+├── gui/
+│   ├── Dockerfile              # GUI desktop
+│   ├── entrypoint.sh
+│   └── fonts.conf
+├── flight-controller/
+│   ├── Dockerfile              # ArduPilot SITL
+│   ├── parameters/rover.parm
+│   ├── missions/default_mission.txt
+│   └── scripts/startup.sh
+├── flight-computer/
+│   ├── Dockerfile              # ROS2 + MAVROS
+│   ├── src/mavros_bridge/      # Custom MAVROS bridge
+│   ├── config/mavros_config.yaml
+│   ├── launch/flight_computer.launch.py
+│   └── scripts/entrypoint.sh
+├── simulation/
+│   ├── Dockerfile              # Gazebo physics
+│   ├── worlds/rover_world.world
+│   ├── config/controllers.yaml
+│   ├── launch/simulation.launch.py
+│   └── scripts/entrypoint.sh
+├── Makefile                    # Build system
+└── MULTI_COMPONENT.md          # Architecture specification
+```
+
+## Available Make Targets
+
+### Build Targets
+- `make all` - Build all images (default)
+- `make base` - Build ROS2 base image
+- `make gazebo` - Build Gazebo image  
+- `make gui` - Build GUI image
+- `make flight-controller` - Build ArduPilot SITL image
+- `make flight-computer` - Build ROS2 + MAVROS image
+- `make simulation` - Build Gazebo physics image
+- `make multicomponent` - Build all multi-component images
+
+### Publishing Targets
+- `make publish` - Push all images to registry
+- `make publish-latest` - Push and tag as latest
+- `make publish-base` - Push base images only
+- `make publish-multicomponent` - Push multi-component images only
+
+### Testing Targets
+- `make test-flight-controller` - Test ArduPilot SITL image
+- `make test-containers` - Test all images
+
+### Utility Targets
+- `make clean` - Clean build artifacts
+- `make clean-all` - Remove all built images
+- `make print-tag` - Show current git tag
+- `make print-image-names` - Show all image names and tags
+- `make help` - Show all available targets
+
+## Usage Examples
+
+### Pull Pre-built Images
+```bash
+# Pull published images
+docker pull ghcr.io/wkronmiller/rover-flight-controller:latest
+docker pull ghcr.io/wkronmiller/rover-flight-computer:latest  
+docker pull ghcr.io/wkronmiller/rover-simulation:latest
+
+# Or use the GUI image for visualization
+docker pull ghcr.io/wkronmiller/docker-ros-gazebo-gui:latest
+```
+
+### Docker Compose Example
+```yaml
+# docker-compose.yml - Complete rover simulation system
+version: '3.8'
+services:
+  flight-controller:
+    image: ghcr.io/wkronmiller/rover-flight-controller:latest
+    ports:
+      - "14550:14550/udp"  # MAVLink communication
+      - "5760:5760"        # Console access
+    environment:
+      - VEHICLE=APMrover2
+      - MODEL=rover
+      - LAT=37.7749
+      - LON=-122.4194
+
+  flight-computer:
+    image: ghcr.io/wkronmiller/rover-flight-computer:latest
+    depends_on:
+      - flight-controller
+    environment:
+      - ROS_DOMAIN_ID=0
+      - MAVROS_FCU_URL=udp://flight-controller:14550@
+
+  simulation:
+    image: ghcr.io/wkronmiller/rover-simulation:latest
+    environment:
+      - ROS_DOMAIN_ID=0
+      - GAZEBO_MASTER_URI=http://localhost:11345
+    ports:
+      - "11345:11345"      # Gazebo master
+
+  # Optional: GUI for visualization
+  gui:
+    image: ghcr.io/wkronmiller/docker-ros-gazebo-gui:latest
+    ports:
+      - "5901:5901"        # VNC access
+    environment:
+      - DISPLAY=:1
+```
+
+### Individual Container Usage
+```bash
+# Run ArduPilot SITL flight controller
+docker run -d --name flight-controller \
+  -p 14550:14550/udp -p 5760:5760 \
+  ghcr.io/wkronmiller/rover-flight-controller:latest
+
+# Run ROS2 flight computer with MAVROS
+docker run -d --name flight-computer \
+  --link flight-controller \
+  -e MAVROS_FCU_URL=udp://flight-controller:14550@ \
+  ghcr.io/wkronmiller/rover-flight-computer:latest
+
+# Run Gazebo simulation
+docker run -d --name simulation \
+  -p 11345:11345 \
+  ghcr.io/wkronmiller/rover-simulation:latest
+
+# Access GUI via VNC (password: 1234)
+docker run -d --name gui \
   -p 5901:5901 \
-  --gpus all \
-  ros2-gazebo-vnc
-
-# With workspace mounting for development
-docker run -d \
-  --name gazebo-desktop \
-  -p 5901:5901 \
-  --gpus all \
-  -v $(pwd)/workspace:/home/gazebo/workspace \
-  ros2-gazebo-vnc
-
-# Alternative: Using Docker Compose
-docker compose up -d
+  ghcr.io/wkronmiller/docker-ros-gazebo-gui:latest
 ```
 
-### 3. Connect via VNC
-- **VNC Client**: Connect to `localhost:5901`
-- **VNC Password**: `1234`
-- **Desktop**: Click the Gazebo icon on the desktop to launch the simulator
+## Architecture Benefits
 
-### 4. Login Credentials (if needed)
-- The container automatically logs into the `gazebo` user, and the KDE screen locker is disabled to keep sessions active.
-- **Username**: `gazebo`
-- **Password**: `password12345!`
+### Hardware Authenticity
+- **Separate containers** mirror real flight controller + companion computer deployment
+- **Real MAVLink protocols** between components
+- **Independent failure domains** and resource allocation
 
-### 5. Verify Installation
-Open a terminal (Konsole) in the VNC desktop and run:
-```bash
-# Check ROS2 installation
-ros2 --version
+### Development Efficiency
+- **Component isolation** enables focused debugging
+- **Independent builds** and deployment
+- **Clear separation** of concerns between autopilot, navigation, and simulation
 
-# Launch Gazebo
-source /opt/ros/humble/setup.bash
-gazebo
+### Deployment Ready
+- **Same images** work on real hardware
+- **Realistic communication patterns**
+- **Production-ready** container architecture
 
-# Test ROS2 + Gazebo integration
-ros2 launch gazebo_ros empty_world.launch.py
-```
+## See Also
 
-That's it! You now have a complete ROS2 Gazebo development environment running in your browser.
-
-## What This Package Is Used For
-
-This Docker container is designed for:
-
-- **Robotics Development**: Full ROS2 Humble environment with development tools
-- **Robot Simulation**: Gazebo Classic for 3D robot simulation and testing
-- **Remote Development**: VNC-based GUI access for headless server deployment
-- **Educational Use**: Complete robotics environment for learning and teaching
-- **CI/CD Pipelines**: Consistent environment for automated testing and simulation
-- **Cross-Platform Development**: Unified robotics environment across different host systems
-
-## How It Works
-
-The container provides a complete Linux desktop environment accessible via VNC, with:
-
-1. **CUDA-enabled Ubuntu 22.04** base system for GPU acceleration
-2. **KDE Plasma Desktop** for a modern, professional GUI experience
-3. **ROS2 Humble** with full desktop installation including RViz and rqt tools
-4. **Gazebo Classic** robot simulator with ROS2 integration
-5. **VNC Server** (TigerVNC) for remote desktop access on port 5901
-6. **Non-root user security** - runs as `gazebo` user by default
-
-### Connection Details
-- **VNC Port**: 5901
-- **VNC Password**: 1234 (configurable via build arg)
-- **Desktop Resolution**: 1920x1080
-- **User Account**: `gazebo` / `password12345!`
-
-## File Structure and Purpose
-
-### Core Container Files
-
-#### `gui/Dockerfile`
-Multi-stage Docker build file with three stages:
-- **Stage 0 (base)**: CUDA-enabled Ubuntu with KDE Plasma desktop and VNC server
-- **Stage 1 (ros)**: ROS2 Humble installation with Gazebo and theming packages
-- **Stage 2 (final)**: User configuration, VNC setup, and desktop customization
-
-Key features:
-- Non-root user setup for security
-- Comprehensive theming for professional appearance
-- Font configuration for crisp text rendering
-- Desktop shortcuts and launchers
-
-#### `gui/entrypoint.sh`
-Container startup script that:
-- Sources ROS2 environment (`/opt/ros/humble/setup.bash`)
-- Configures XDG runtime directories for desktop session
-- Starts TigerVNC X server on display :1
-- Initializes D-Bus session bus
-- Launches KWin window manager
-- Starts KDE Plasma desktop environment
-
-Environment variables configured:
-- `DISPLAY=:1` - X11 display for VNC
-- `QT_X11_NO_MITSHM=1` - Fixes VNC compatibility issues
-- `GAZEBO_MODEL_PATH` - Path to Gazebo model resources
-- `QT_STYLE_OVERRIDE=kvantum` - Consistent Qt theming
-
-### Desktop Configuration Files
-
-#### `gui/gazebo.desktop`
-Desktop launcher shortcut for Gazebo simulator:
-- **Type**: Application launcher
-- **Exec**: `bash -c 'source /opt/ros/humble/setup.bash && gazebo'`
-- **Category**: Development/Simulation
-- Creates clickable desktop icon for easy Gazebo access
-
-#### `gui/fonts.conf`
-Font rendering configuration for crisp text display:
-- Enables font anti-aliasing for smooth text
-- Configures hinting for better readability
-- Sets LCD filter for optimal screen rendering
-- Uses RGB sub-pixel rendering
-
-#### `gui/gtkrc-2.0`
-GTK2 theme configuration ensuring visual consistency:
-- **Theme**: Yaru (Ubuntu's modern theme)
-- **Icons**: Yaru icon set
-- **Font**: Ubuntu 10pt
-- Ensures GTK2 applications match KDE Plasma appearance
-
-### Documentation
-
-#### `COMMIT_MSG`
-Git commit message describing the container's evolution to non-root user operation, highlighting security improvements and performance optimizations.
-
-## Docker Build Stages
-
-### Stage 0: Base System (`base`)
-```dockerfile
-FROM nvidia/cuda:12.3.2-base-ubuntu22.04 as base
-```
-
-**Purpose**: Foundation layer with desktop environment and VNC capability
-
-**Key Components**:
-- NVIDIA CUDA 12.3.2 base for GPU acceleration
-- KDE Plasma desktop environment (`kde-plasma-desktop`)
-- Konsole terminal emulator
-- KWin X11 window manager
-- TigerVNC server components
-- Virtual framebuffer X server (Xvfb)
-- D-Bus session bus support
-- Sudo for privilege management
-
-**Size Impact**: ~2GB (desktop environment and CUDA base)
-
-### Stage 1: ROS Installation (`ros`)
-```dockerfile
-FROM base AS ros
-```
-
-**Purpose**: Adds ROS2 Humble and Gazebo Classic with integration packages
-
-**Key Components**:
-- ROS2 Humble desktop meta-package (includes RViz, rqt tools)
-- Gazebo Classic robot simulator
-- ROS2-Gazebo bridge packages (`gazebo-ros`, `gazebo-ros-pkgs`)
-- Python development tools (`rosdep2`, `colcon`)
-- Comprehensive theming packages for professional GUI
-- Font packages for text rendering
-
-**Size Impact**: ~3GB additional (ROS2 ecosystem and Gazebo)
-
-### Stage 2: Final Configuration (`final`)
-```dockerfile
-FROM ros AS final
-```
-
-**Purpose**: User setup, security configuration, and desktop customization
-
-**Key Components**:
-- Non-root `gazebo` user creation with sudo privileges
-- VNC password configuration for both root and gazebo users
-- Desktop environment setup (shortcuts, themes, fonts)
-- Configuration file deployment
-- Startup script installation
-- Working directory and user context switching
-
-**Size Impact**: Minimal (~50MB for configuration files)
-
-## Usage
-
-### Building the Container
-```bash
-docker build -t ros2-gazebo-vnc .
-```
-
-### Running the Container
-```bash
-docker run -d \
-  --name gazebo-desktop \
-  -p 5901:5901 \
-  --gpus all \
-  ros2-gazebo-vnc
-```
-
-### Accessing the Desktop
-1. Connect to `localhost:5901` using any VNC client
-2. Use password: `1234`
-3. Launch Gazebo from the desktop shortcut or terminal
-
-### Development Workflow
-1. Mount your ROS2 workspace: `-v /path/to/workspace:/home/gazebo/workspace`
-2. Use the integrated terminal (Konsole) for ROS2 commands
-3. Access GUI tools like RViz and Gazebo through the desktop
-4. Development files persist in mounted volumes
-
-## Security Features
-
-- **Non-root operation**: Container runs as `gazebo` user by default
-- **Sudo access**: Available for administrative tasks when needed
-- **VNC authentication**: Password-protected remote access
-- **Isolated environment**: Containerized separation from host system
-- **Secure defaults**: No SSH servers or unnecessary network services
-
-## Performance Optimizations
-
-- **GPU acceleration**: NVIDIA CUDA support for Gazebo rendering
-- **Multi-stage builds**: Optimized layer caching and size
-- **Build-time configuration**: User setup moved from runtime to build time
-- **Efficient startup**: Streamlined desktop environment initialization
-- **Font rendering**: Optimized for crisp text display over VNC
-
-This container provides a professional, secure, and efficient environment for ROS2 robotics development with remote GUI access.
+- `MULTI_COMPONENT.md` - Complete multi-component architecture specification
+- `Makefile` - Complete build system documentation
